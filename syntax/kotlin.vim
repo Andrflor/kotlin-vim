@@ -48,6 +48,30 @@ syn match ktCharacter "\v'[^']*'" contains=ktSpecialChar,ktSpecialCharError
 syn match ktCharacter "\v'\\''" contains=ktSpecialChar
 syn match ktCharacter "\v'[^\\]'"
 
+" KDoc
+syn case ignore
+
+syn region ktMarkdownLink matchgroup=markdownLinkDelimiter start="\[" end="\]" oneline keepend skipwhite contained
+syn cluster ktMarkdown contains=ktMarkdownLink
+hi link ktMarkdownLink markdownLinkText
+hi link ktMarkdownLinkDelimiter markdownLinkText
+
+syn include @ktMarkdown syntax/markdown.vim
+unlet b:current_syntax
+
+syn match ktCommentStar      contained "^\s*\*\ze[^/]"
+syn match ktCommentStar      contained "^\s*\*$"
+syn match ktCommentStar      contained "^\s*\*/"
+syn region ktDocComment       start="/\*\*"  end="\*/" keepend contains=ktCommentStar,ktCommentTitle,@ktMarkdown,ktDocTags,ktDocSeeTag,ktTodo
+syn region ktCommentTitle     contained matchgroup=ktDocComment start="/\*\*"   matchgroup=ktCommentTitle keepend end="\.$" end="\.[ \t\r<&]"me=e-1 end="[^{]@"me=s-2,he=s-1 end="\*/"me=s-2 contains=ktCommentStar,@ktMarkdown,ktTodo,ktDocTags,ktDocSeeTag
+
+syn match ktDocTags         contained "@\(param\|property\|throws\|exception\|sample\|see\)\s\+\S\+" contains=ktDocParam
+syn match ktDocParam        contained "\s\S\+"
+syn match ktDocTags         contained "@\(return\|constructor\|receiver\|author\|since\|suppress\)\>"
+
+syn case match
+" ---
+
 " TODO: highlight label in 'this@Foo'
 syn match ktAnnotation "\v(\w)@<!\@[[:alnum:]_.]*(:[[:alnum:]_.]*)?"
 syn match ktLabel "\v\w+\@"
@@ -65,19 +89,33 @@ syn match ktEscapedName "\v`.*`"
 syn match ktExclExcl "!!"
 syn match ktArrow "->"
 
+syn match ktIdentifier "\<[a-z]\w*\>"
+syn match ktInfix " \zs[a-z]\w*" contained
+syn match ktInfixPair "\<\w\+\s\+[a-z]\w*\>" contains=ktInfix,ktNumber,ktFloat,ktEscapedName,ktString,ktCharacter
+syn match ktFunction "\<[a-z]\w\+\ze\s*[({]"
+syn match ktClass "\<[A-Z]\w*\>"
+syn match ktClas "\.\<[A-Z]\w*\>"
+syn match ktFunctionCls "\<[A-Z]\w\+\ze\s*[({]"
+syn match ktArgument "\w*\:"
+
 hi def link ktStatement Statement
 hi def link ktConditional Conditional
 hi def link ktRepeat Repeat
 hi def link ktOperator Operator
-hi def link ktKeyword Keyword
+hi def link ktKeyword Conditional
 hi def link ktException Exception
 hi def link ktReservedKeyword Error
+
+hi link ktCommentStar Comment
+hi link ktDocComment Comment
+hi link ktCommentTitle SpecialComment
+hi link ktDocTags Statement
 
 hi def link ktInclude Include
 
 hi def link ktType Type
-hi def link ktModifier StorageClass
-hi def link ktStructure Structure
+hi link ktModifier Conditional
+hi def link ktStructure Conditional
 hi def link ktTypedef Typedef
 
 hi def link ktBoolean Boolean
@@ -96,6 +134,14 @@ hi def link ktSpecialChar SpecialChar
 hi def link ktSpecialCharError Error
 hi def link ktString String
 hi def link ktCharacter Character
+
+hi link ktClass Structure
+hi link ktClas Modifier
+hi link ktFunction Special
+hi link ktFunctionCls Special
+hi link ktArgument Number
+hi link ktArguments Number
+
 
 hi def link ktAnnotation Identifier
 hi def link ktLabel Identifier
